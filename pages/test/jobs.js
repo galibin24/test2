@@ -58,7 +58,6 @@ export default function JobsPage({ jobs }) {
       const filterResult = activeFilter.handler(job);
 
       if (filter == "companyName") {
-        console.log(activeFilter);
         filterResult = activeFilter.handler(job, activeFilter.value);
       }
       // push the result to results array

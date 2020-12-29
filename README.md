@@ -4,7 +4,7 @@ This is a second assigment for frontend developer job at Zippia.Inc .
 
 Clone the directory.
 
-Run install all the packages by running:
+Install all the packages by running:
 
 ```bash
 npm install
