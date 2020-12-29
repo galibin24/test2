@@ -1,8 +1,8 @@
-// import page specific styles
 import { useState } from "react";
+// import page specific styles
 import styles from "../../styles/jobsPage.module.css";
 
-export default function jobsPage({ jobs }) {
+export default function JobsPage({ jobs }) {
   /* 
     Here we define the filters applied to the list of jobs.(line 13)
     Each filter have a state and handler which defines if filter passes or not.
@@ -17,20 +17,27 @@ export default function jobsPage({ jobs }) {
     },
     companyName: {
       state: false,
-      value: "",
-      handler: (job, filterState) => companyNameFilter(job, filterState),
+      value: "None",
+      handler: (job, companyName) => companyNameFilter(job, companyName),
     },
   });
+  const companyNames = jobs.slice(0, 10).map((job) => job.companyName);
 
+  // filter for posting dates
   const sevenDayPostingsFilter = (job) => {
-    if (parseInt(job["postedDate"].charAt(0)) <= 7) {
+    // parse the posted date string
+    const postedDate = parseInt(job["postedDate"].match(/\d/g).join(""));
+    // compare the posted date
+    if (postedDate <= 7) {
       return true;
-    } else return false;
+    }
+    return false;
   };
 
-  const companyNameFilter = (job, filterState) => {
-    if (job.companyName == filterState.value) return true;
-    else return false;
+  // filter for companyName
+  const companyNameFilter = (job, companyName) => {
+    if (job.companyName === companyName) return true;
+    return false;
   };
 
   // Function handling filtering of the jobs list
@@ -39,16 +46,62 @@ export default function jobsPage({ jobs }) {
     const activeFilters = Object.keys(filters).filter(
       (key) => filters[key].state
     );
+
     // array of filtering results(if filter passes then true added, else false)
     const filterResults = [];
+
     for (let filter of activeFilters) {
       // call the filter handling function and push result to filterResults
-      filterResults.push(filters[filter].handler(job, filters[filter]));
+      const activeFilter = filters[filter];
+
+      // filter the result
+      const filterResult = activeFilter.handler(job);
+
+      if (filter == "companyName") {
+        console.log(activeFilter);
+        filterResult = activeFilter.handler(job, activeFilter.value);
+      }
+      // push the result to results array
+      filterResults.push(filterResult);
     }
 
     // if all active filters pass return true
     if (filterResults.every((filter) => filter === true)) return true;
     else return false;
+  };
+
+  // Handle the change of seven day filter
+  const onSevenDayFilterChange = () => {
+    setFilters({
+      ...filters,
+      sevenDayPostings: {
+        ...filters.sevenDayPostings,
+        // sets the state to oposite of it was before
+        state: !filters.sevenDayPostings.state,
+      },
+    });
+  };
+  // Handle the change of Company Name filter
+  const onCompanyFilterChange = (e) => {
+    let filterValue = e.target.value;
+    let filterState = true;
+
+    // If None is chosen the filter resets to default
+    if (e.target.value == "None") {
+      filterValue = "";
+      filterState = false;
+    }
+
+    const companyFilter = {
+      ...filters.companyName,
+      state: filterState,
+      value: filterValue,
+    };
+
+    setFilters({
+      ...filters,
+      companyName: companyFilter,
+    });
   };
 
   return (
@@ -57,53 +110,25 @@ export default function jobsPage({ jobs }) {
         <div className="col-lg-3 btn-prim">
           <div class="form-group">
             <label for="exampleFormControlSelect1">Select Company Name</label>
+            {/* Select the company out of all companies available */}
             <select
               class="form-control"
               id="exampleFormControlSelect1"
-              onChange={(e) => {
-                console.log(e.target.value);
-                // if none chosen as a value the filter goes to default
-                if (e.target.value == "None") {
-                  setFilters({
-                    ...filters,
-                    companyName: {
-                      ...filters.companyName,
-                      state: false,
-                      value: "",
-                    },
-                  });
-                } else {
-                  setFilters({
-                    ...filters,
-                    companyName: {
-                      ...filters.companyName,
-                      state: true,
-                      value: e.target.value,
-                    },
-                  });
-                }
-              }}
+              onChange={(e) => onCompanyFilterChange(e)}
             >
-              <option>None</option>
-              {jobs.slice(0, 10).map((job) => {
-                return <option>{job.companyName}</option>;
+              <option value="None">None</option>
+              {companyNames.map((name) => {
+                return <option>{name}</option>;
               })}
             </select>
           </div>
         </div>
         <div className="col-lg-3 btn-prim">
+          {/* Button to show only past 7 days */}
           <button
             type="button"
             class="btn btn-primary"
-            onClick={() =>
-              setFilters({
-                ...filters,
-                sevenDayPostings: {
-                  ...filters.sevenDayPostings,
-                  state: !filters.sevenDayPostings.state,
-                },
-              })
-            }
+            onClick={() => onSevenDayFilterChange()}
           >
             Show Jobs in last 7 days
           </button>
@@ -111,33 +136,37 @@ export default function jobsPage({ jobs }) {
       </div>
 
       <div className="row justify-content-center">
-        {/* check if any filters apply*/}
-        {Object.values(filters).some((filter) => filter.state)
-          ? // if filters apply then filter the jobs list before displaying
-            jobs
-              .slice(0, 10)
-              .filter((job) => jobsFilter(job))
-              .map((job) => {
-                return (
-                  <div className="col-lg-3">
-                    <h5>{job.jobTitle}</h5>
-                    <p>{job.companyName}</p>
-                    <p>{job.shortDesc}</p>
+        {jobs
+          // Choose first 10 jobs
+          .slice(0, 10)
+          // Filter the jobs
+          .filter((job) => {
+            // Check if there any active filters
+            const anyFiltersActive = Object.values(filters).some(
+              (filter) => filter.state
+            );
+            // If no filter active return all jobs
+            if (!anyFiltersActive) return true;
+            // Else return the result of filtering
+            return jobsFilter(job);
+          })
+          // Map the filtered jobs to component
+          .map((job) => {
+            return (
+              <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                <div className={styles.jobContainer}>
+                  <div className={styles.jobContainerTop}>
+                    <div className={styles.jobCompanyName}>
+                      {job.companyName}
+                    </div>
+                    <div className={styles.jobTitle}>{job.jobTitle}</div>
                   </div>
-                );
-              })
-          : // if no filter apply, display all jobs
-            jobs
-              .map((job) => {
-                return (
-                  <div className="col-lg-3">
-                    <h5>{job.jobTitle}</h5>
-                    <p>{job.companyName}</p>
-                    <p>{job.shortDesc}</p>
-                  </div>
-                );
-              })
-              .slice(0, 10)}
+
+                  <div className={styles.jobDescription}>{job.shortDesc}</div>
+                </div>
+              </div>
+            );
+          })}
       </div>
     </div>
   );
