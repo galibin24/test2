@@ -16,4 +16,4 @@ Then you can start development server by running:
 npm run dev
 ```
 
-Open [http://localhost:3000/test/jobs]with your browser to see the result.
+Open [http://localhost:3000/test/jobs](http://localhost:3000/test/jobs) with your browser to see the result.
