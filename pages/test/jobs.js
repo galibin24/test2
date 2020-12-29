@@ -106,28 +106,27 @@ export default function JobsPage({ jobs }) {
 
   return (
     <div className="container">
-      <div className="row justify-content-center">
-        <div className="col-lg-3 btn-prim">
-          <div class="form-group">
-            <label for="exampleFormControlSelect1">Select Company Name</label>
+      <div className={`row justify-content-center ${styles.filtersContainer}`}>
+        <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12 btn-prim">
+          <div className="form-group">
+            <label>Select Company Name</label>
             {/* Select the company out of all companies available */}
             <select
-              class="form-control"
-              id="exampleFormControlSelect1"
+              className="form-control"
               onChange={(e) => onCompanyFilterChange(e)}
             >
               <option value="None">None</option>
               {companyNames.map((name) => {
-                return <option>{name}</option>;
+                return <option key={name}>{name}</option>;
               })}
             </select>
           </div>
         </div>
-        <div className="col-lg-3 btn-prim">
+        <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12 btn-prim">
           {/* Button to show only past 7 days */}
           <button
             type="button"
-            class="btn btn-primary"
+            className={`btn btn-primary ${styles.sevenDaysFilterButton}`}
             onClick={() => onSevenDayFilterChange()}
           >
             Show Jobs in last 7 days
@@ -153,7 +152,10 @@ export default function JobsPage({ jobs }) {
           // Map the filtered jobs to component
           .map((job) => {
             return (
-              <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div
+                key={job.companyName}
+                className="col-xl-3 col-lg-4 col-md-6 col-sm-12"
+              >
                 <div className={styles.jobContainer}>
                   <div className={styles.jobContainerTop}>
                     <div className={styles.jobCompanyName}>

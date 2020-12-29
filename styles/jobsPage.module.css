@@ -88,3 +88,18 @@
   overflow-wrap: break-word;
   -webkit-line-clamp: 2;
 }
+
+.filtersContainer {
+  margin-top: 20px;
+}
+
+.sevenDaysFilterButton {
+  margin-top: 32px;
+}
+
+@media (max-width: 425px) {
+  .sevenDaysFilterButton {
+    margin-top: 5px;
+    justify-content: center;
+  }
+}
