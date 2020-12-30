@@ -2,7 +2,7 @@ This is a second assigment for frontend developer job at Zippia.Inc .
 
 ## Project Description
 
-This web app fatches the jobs from https://www.zippia.com/api/jobs/, and displays them as a list.
+This web app fetches the jobs from https://www.zippia.com/api/jobs/, and displays them as a list.
 
 The project was made using Next.js to achieve server-side-rendering of API requests.
 
