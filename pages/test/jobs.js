@@ -1,12 +1,13 @@
 import { useState } from "react";
 // import page specific styles
 import styles from "../../styles/jobsPage.module.css";
+import Select from "react-select";
 
 export default function JobsPage({ jobs }) {
   /* 
     Here we define the filters applied to the list of jobs.(line 13)
     Each filter have a state and handler which defines if filter passes or not.
-    This design allows us to add extra fiters to our list with no difficulty and 
+    This design allows us to add extra fiters to our filters stata with no difficulty and 
     makes the code easily extensible, as code grows the filter handlers can be 
     seperated in diffrent file.
   */
@@ -21,7 +22,12 @@ export default function JobsPage({ jobs }) {
       handler: (job, companyName) => companyNameFilter(job, companyName),
     },
   });
-  const companyNames = jobs.slice(0, 10).map((job) => job.companyName);
+  const companyNames = jobs.slice(0, 10).map((job) => {
+    return {
+      label: job.companyName,
+      value: job.companyName,
+    };
+  });
 
   // filter for posting dates
   const sevenDayPostingsFilter = (job) => {
@@ -55,8 +61,9 @@ export default function JobsPage({ jobs }) {
       const activeFilter = filters[filter];
 
       // filter the result
-      const filterResult = activeFilter.handler(job);
+      let filterResult = activeFilter.handler(job);
 
+      // if fi
       if (filter == "companyName") {
         filterResult = activeFilter.handler(job, activeFilter.value);
       }
@@ -81,12 +88,12 @@ export default function JobsPage({ jobs }) {
     });
   };
   // Handle the change of Company Name filter
-  const onCompanyFilterChange = (e) => {
-    let filterValue = e.target.value;
+  const onCompanyFilterChange = (opt) => {
+    let filterValue = opt.value;
     let filterState = true;
 
     // If None is chosen the filter resets to default
-    if (e.target.value == "None") {
+    if (opt.value == "None") {
       filterValue = "";
       filterState = false;
     }
@@ -110,15 +117,12 @@ export default function JobsPage({ jobs }) {
           <div className="form-group">
             <label>Select Company Name</label>
             {/* Select the company out of all companies available */}
-            <select
-              className="form-control"
-              onChange={(e) => onCompanyFilterChange(e)}
-            >
-              <option value="None">None</option>
-              {companyNames.map((name) => {
-                return <option key={name}>{name}</option>;
-              })}
-            </select>
+            <Select
+              options={[...companyNames, { value: "None", label: "None" }]}
+              id="Company Name Select"
+              onChange={(opt) => onCompanyFilterChange(opt)}
+              defaultValue={{ value: "None", label: "None" }}
+            ></Select>
           </div>
         </div>
         <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12 btn-prim">
@@ -128,15 +132,15 @@ export default function JobsPage({ jobs }) {
             className={`btn btn-primary ${styles.sevenDaysFilterButton}`}
             onClick={() => onSevenDayFilterChange()}
           >
-            Show Jobs in last 7 days
+            {filters.sevenDayPostings.state
+              ? "Show all jobs"
+              : "Show Jobs in last 7 days"}
           </button>
         </div>
       </div>
 
       <div className="row justify-content-center">
         {jobs
-          // Choose first 10 jobs
-          .slice(0, 10)
           // Filter the jobs
           .filter((job) => {
             // Check if there any active filters
@@ -148,6 +152,8 @@ export default function JobsPage({ jobs }) {
             // Else return the result of filtering
             return jobsFilter(job);
           })
+          // Choose first 10 jobs
+          .slice(0, 10)
           // Map the filtered jobs to component
           .map((job) => {
             return (
