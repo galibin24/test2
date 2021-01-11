@@ -179,6 +179,13 @@ export default function JobsPage({ jobs }) {
   );
 }
 
+// TODO best practices for js 
+// TODO design patterns 
+// TODO query optimization   
+// TODO float in css(clear float)
+// TODO MongoDB query 
+// TODO debounce and throttle
+
 // server rendering of the jobs request
 export async function getServerSideProps() {
   // Fetch jobs data from API
